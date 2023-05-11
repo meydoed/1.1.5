@@ -3,10 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,97 +14,80 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void createUsersTable() {
         String sql = "CREATE TABLE user (id  BIGINT, name NVARCHAR(20), lastName NVARCHAR(20), age TINYINT)";
-
-        Statement statement = null;
-        try {
-            statement = Util.getConnection().createStatement();
+        Connection connection = Util.getConnection();
+        try (connection) {
+            Statement statement = connection.createStatement();
             statement.execute(sql);
+            connection.commit();
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
     }
 
     public void dropUsersTable() {
         String sql = "DROP TABLE user";
-
-        Statement statement = null;
-        try {
-            statement = Util.getConnection().createStatement();
+        Connection connection = Util.getConnection();
+        try (connection) {
+            Statement statement = connection.createStatement();
             statement.execute(sql);
+            connection.commit();
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        PreparedStatement pStatement = null;
         String sql = "INSERT INTO user (name, lastName, age) VALUES (?, ?, ?)";
-        try {
-            pStatement = Util.getConnection().prepareStatement(sql);
-
+        Connection connection = Util.getConnection();
+        try (connection) {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
             pStatement.setString(1, name);
             pStatement.setString(2, lastName);
             pStatement.setByte(3, age);
 
             pStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
-        } finally {
-            if (pStatement != null) {
-                try {
-                    pStatement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
     }
 
     public void removeUserById(long id) {
-        PreparedStatement pStatement = null;
         String sql = "DELETE FROM user WHERE id=?";
-        try {
-            pStatement = Util.getConnection().prepareStatement(sql);
-
+        Connection connection = Util.getConnection();
+        try (connection) {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
             pStatement.setLong(1, id);
 
             pStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
-        } finally {
-            if (pStatement != null) {
-                try {
-                    pStatement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
     }
 
     public List<User> getAllUsers() {
-        Statement statement = null;
         List<User> userList = new ArrayList<>();
         String sql = "SELECT id, name, lastName, age FROM user";
-
-        try {
-            statement = Util.getConnection().createStatement();
+        Connection connection = Util.getConnection();
+        try (connection) {
+            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 
             while (resultSet.next()) {
@@ -119,36 +99,29 @@ public class UserDaoJDBCImpl implements UserDao {
 
                 userList.add(user);
             }
+            connection.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
         return userList;
     }
 
     public void cleanUsersTable() {
-        PreparedStatement pStatement = null;
         String sql = "TRUNCATE TABLE user";
-        try {
-            pStatement = Util.getConnection().prepareStatement(sql);
-
+        Connection connection = Util.getConnection();
+        try (connection) {
+            PreparedStatement pStatement = connection.prepareStatement(sql);
             pStatement.executeUpdate();
+            connection.commit();
         } catch (SQLException e) {
-            //throw new RuntimeException(e);
-        } finally {
-            if (pStatement != null) {
-                try {
-                    pStatement.close();
-                } catch (SQLException e) {
-                    //throw new RuntimeException(e);
-                }
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                //throw new RuntimeException(ex);
             }
         }
     }

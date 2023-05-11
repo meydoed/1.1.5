@@ -12,8 +12,10 @@ public class Util {
     static public Connection getConnection() {
 
         Connection connection = null;
+
         try {
             connection = DriverManager.getConnection(connectionUrl, username, password);
+            connection.setAutoCommit(false);
             if (!connection.isClosed()) {
                 System.out.println("Database connected!");
             }
